@@ -1,10 +1,83 @@
 import { useState } from 'react';
 import { Brain, Lightbulb, Home, Info, Mail, Settings, Moon, Sun, Users, FileText, PieChart, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import '../components/Auth.css';
 
 
 export default function Dashboard({ onLogout }: { onLogout?: () => void }) {
   const [darkMode, setDarkMode] = useState(false);
+  const [selectedPage, setSelectedPage] = useState<string | null>(null);
   const toggleDarkMode = () => setDarkMode(!darkMode);
+
+  const goBack = () => setSelectedPage(null);
+
+  const renderPageContent = (key: string) => {
+    switch (key) {
+      case 'predict':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Predict Customer Churn with Smart AI</h2>
+            <p className="mb-4">Run predictions for individual customers or batches to identify churn risk.</p>
+            <button className="auth-button" onClick={() => alert('Run prediction (placeholder)')}>Run Prediction</button>
+          </div>
+        );
+      case 'enter':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Enter Customer Details</h2>
+            <p className="mb-4">Manually add a customer record to evaluate churn risk.</p>
+            <form className="space-y-4 max-w-md">
+              <input className="form-input" placeholder="Customer ID" />
+              <input className="form-input" placeholder="Monthly Charges" />
+              <button className="auth-button" type="button">Save Customer</button>
+            </form>
+          </div>
+        );
+      case 'upload':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Upload Customer CSV</h2>
+            <p className="mb-4">Upload a CSV file with customer data to run bulk predictions.</p>
+            <input type="file" accept=".csv" />
+          </div>
+        );
+      case 'overview':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Customer Churn Overview</h2>
+            <p className="mb-4">High-level metrics and a quick snapshot of churn across segments.</p>
+          </div>
+        );
+      case 'insights':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Quick Insights</h2>
+            <ul className="list-disc pl-6">
+              <li>Customers on month-to-month contracts have higher churn.</li>
+              <li>High monthly charges correlate with greater churn risk.</li>
+            </ul>
+          </div>
+        );
+      case 'about':
+        return (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">About ChurnIQ</h2>
+            <p>ChurnIQ helps you predict and prevent customer churn using explainable AI models.</p>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const optionCards = [
+    { key: 'predict', title: 'Predict Customer Churn with Smart AI', icon: Brain, gradient: 'from-indigo-500 to-blue-500', description: 'Run predictions for individual customers or batches.' },
+    { key: 'enter', title: 'Enter Customer Details', icon: Users, gradient: 'from-green-400 to-emerald-500', description: 'Manually add a customer record.' },
+    { key: 'upload', title: 'Upload Customer CSV', icon: FileText, gradient: 'from-purple-500 to-pink-500', description: 'Upload a CSV for bulk predictions.' },
+    { key: 'overview', title: 'Customer Churn Overview', icon: PieChart, gradient: 'from-yellow-400 to-orange-400', description: 'High-level metrics and snapshots.' },
+    { key: 'insights', title: 'Quick Insights', icon: Zap, gradient: 'from-teal-400 to-cyan-500', description: 'Short actionable insights.' },
+    { key: 'about', title: 'About ChurnIQ', icon: Info, gradient: 'from-pink-500 to-rose-500', description: 'Learn more about ChurnIQ.' }
+  ];
 
   return (
     <div className={`min-h-screen ${darkMode ? 'dark' : ''} bg-gray-50 dark:bg-gray-900`}>
@@ -77,30 +150,56 @@ export default function Dashboard({ onLogout }: { onLogout?: () => void }) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
           <div className="max-w-3xl text-left">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-white">ChurnIQ — Smart Customer Retention Prediction</h1>
-            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                { title: 'Predict Customer Churn with Smart AI', icon: Brain, gradient: 'from-indigo-500 to-blue-500' },
-                { title: 'Enter Customer Details', icon: Users, gradient: 'from-green-400 to-emerald-500' },
-                { title: 'Upload Customer CSV', icon: FileText, gradient: 'from-purple-500 to-pink-500' },
-                { title: 'Customer Churn Overview', icon: PieChart, gradient: 'from-yellow-400 to-orange-400' },
-                { title: 'Quick Insights', icon: Zap, gradient: 'from-teal-400 to-cyan-500' },
-                { title: 'About ChurnIQ', icon: Info, gradient: 'from-pink-500 to-rose-500' }
-              ].map((opt) => {
-                const Icon = opt.icon as any;
-                return (
-                  <button
-                    key={opt.title}
-                    className={`group flex items-center gap-4 p-5 rounded-lg text-left text-white shadow-lg transform hover:-translate-y-1 transition bg-gradient-to-br ${opt.gradient}`}
+            <div className="mt-8">
+              <AnimatePresence mode="wait">
+                {selectedPage ? (
+                  <motion.div
+                    key="page"
+                    initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.99 }}
+                    transition={{ duration: 0.36 }}
+                    className="card-ghost p-6 rounded-lg"
                   >
-                    <span className="p-3 rounded-md bg-white/10 inline-flex items-center justify-center" style={{ minWidth: 48, minHeight: 48 }}>
-                      <Icon className="h-5 w-5 text-white" />
-                    </span>
-                    <div>
-                      <div className="font-semibold text-lg">{opt.title}</div>
+                    <button className="mb-4 inline-flex items-center px-3 py-1 rounded bg-slate-200 dark:bg-gray-700" onClick={goBack}>
+                      ← Back
+                    </button>
+                    <div className="prose max-w-none text-slate-800 dark:text-slate-100">
+                      {renderPageContent(selectedPage)}
                     </div>
-                  </button>
-                )
-              })}
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="grid"
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.4 }}
+                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+                  >
+                    {optionCards.map((opt) => {
+                      const Icon = opt.icon as any;
+                      return (
+                        <motion.button
+                          key={opt.key}
+                          onClick={() => setSelectedPage(opt.key)}
+                          whileHover={{ y: -6 }}
+                          whileTap={{ scale: 0.98 }}
+                          className={`group flex items-center gap-4 p-5 rounded-lg text-left text-white shadow-lg transform transition bg-gradient-to-br ${opt.gradient}`}
+                        >
+                          <span className="p-3 rounded-md bg-white/10 inline-flex items-center justify-center" style={{ minWidth: 48, minHeight: 48 }}>
+                            <Icon className="h-5 w-5 text-white" />
+                          </span>
+                          <div>
+                            <div className="font-semibold text-lg">{opt.title}</div>
+                            <div className="text-sm opacity-90">{opt.description}</div>
+                          </div>
+                        </motion.button>
+                      )
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
